@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "835069881586",
+    "project_id": "app-marketplace-3690c",
+    "storage_bucket": "app-marketplace-3690c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:835069881586:android:4f9dc315006839d51af46b",
+        "android_client_info": {
+          "package_name": "com.diegodev.marketplace"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCa4EkEhGP6a5AZ_fujC7xNDsSRPxa8VlU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

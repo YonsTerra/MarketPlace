@@ -1,131 +1,213 @@
 package com.diegodev.marketplace;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
+import android.content.Intent;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.diegodev.marketplace.adapter.MensajeAdapter;
+import com.diegodev.marketplace.adapter.ConversationAdapter;
 import com.diegodev.marketplace.model.Mensaje;
+import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 public class ChatActivity extends AppCompatActivity {
-    // Identificador del usuario actual (simulado)
-    private static final String CURRENT_USER_ID = "usuario_propio";
-    // Vistas de la interfaz
     private RecyclerView recyclerView;
     private EditText etMensaje;
     private ImageButton btnEnviarMensaje;
     private ImageButton btnEnviarImagen;
     private TextView tvNombreContacto;
     private TextView tvEstadoContacto;
-    // Adaptador y lista de mensajes
+    private ImageView imgProfile;
     private MensajeAdapter mensajeAdapter;
     private List<Mensaje> listaMensajes;
+    private DatabaseReference mensajesRef;
+    private String currentUserId;
+    private String contactoId;
+    private ConversationAdapter conversationAdapter;
+    private List<ConversationAdapter.Item> listaConversaciones;
+    private DatabaseReference conversacionesRef;
+    private android.widget.LinearLayout layoutInput;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //layout chat
         setContentView(R.layout.activity_chat);
-        // 1. Inicialización de Vistas
         inicializarVistas();
-        // 2. Configuración de la Cabecera de Contacto
+        ImageButton btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(v -> finish());
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        currentUserId = user != null ? user.getUid() : null;
+        contactoId = getIntent().getStringExtra("contacto_id");
         configurarCabecera();
-        // 3. Configuración del RecyclerView y carga de datos simulados
-        configurarRecyclerView();
-        // 4. Configuración del Listener del botón de enviar
-        configurarListeners();
+        if (contactoId != null && !contactoId.isEmpty()) {
+            configurarRecyclerView();
+            configurarFirebase();
+            configurarListeners();
+        } else {
+            configurarListaConversaciones();
+        }
     }
     private void inicializarVistas() {
-        // Cabecera
         tvNombreContacto = findViewById(R.id.tvContactName);
         tvEstadoContacto = findViewById(R.id.tvContactStatus);
-        // Lista de mensajes
         recyclerView = findViewById(R.id.recyclerViewChat);
-        // Área de entrada
         etMensaje = findViewById(R.id.editTextMensaje);
         btnEnviarMensaje = findViewById(R.id.btnEnviar);
         btnEnviarImagen = findViewById(R.id.btnAttachImage);
+        layoutInput = findViewById(R.id.layout_input);
+        imgProfile = findViewById(R.id.imgProfile);
     }
     private void configurarCabecera() {
-        // Datos de contacto simulados
-        tvNombreContacto.setText("DiegoDev");
-        tvEstadoContacto.setText("online");
-        // Listener para el botón de retroceso (flecha <- )
-        ImageButton btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> finish());
+        if (contactoId == null || contactoId.isEmpty()) {
+            tvNombreContacto.setText("Mis Chats");
+            tvEstadoContacto.setText("");
+        } else {
+            tvNombreContacto.setText("Contacto");
+            tvEstadoContacto.setText("online");
+            FirebaseDatabase.getInstance().getReference("users").child(contactoId)
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot snapshot) {
+                            String nombre = snapshot.child("nombre").getValue(String.class);
+                            if (nombre != null && !nombre.isEmpty()) tvNombreContacto.setText(nombre);
+                            String avatar = snapshot.child("urlImagenPerfil").getValue(String.class);
+                            if (imgProfile != null) {
+                                Glide.with(ChatActivity.this)
+                                        .load(avatar)
+                                        .placeholder(R.drawable.ic_profile_placeholder)
+                                        .error(R.drawable.ic_profile_placeholder)
+                                        .circleCrop()
+                                        .into(imgProfile);
+                            }
+                        }
+                        @Override public void onCancelled(DatabaseError error) { }
+                    });
+        }
     }
     private void configurarRecyclerView() {
-        // Carga datos estáticos
-        listaMensajes = cargarMensajesDePrueba();
-        // Inicializamos el adaptador con los mensajes y el ID de usuario propio
-        mensajeAdapter = new MensajeAdapter(this, listaMensajes, CURRENT_USER_ID);
-        // Configuramos el RecyclerView
+        listaMensajes = new ArrayList<>();
+        mensajeAdapter = new MensajeAdapter(this, listaMensajes, currentUserId != null ? currentUserId : "");
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        // Hacemos que la lista inicie desde abajo
         layoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(mensajeAdapter);
     }
-    private void configurarListeners() {
-        // Listener para el botón de Enviar Mensaje
-        btnEnviarMensaje.setOnClickListener(v -> enviarMensajeSimulado());
-        // Listener para el botón de Enviar Imagen (simulación)
-        btnEnviarImagen.setOnClickListener(v -> {
-            Toast.makeText(this, "Simulando envío de imagen...", Toast.LENGTH_SHORT).show();
+    private void configurarListaConversaciones() {
+        listaConversaciones = new ArrayList<>();
+        conversationAdapter = new ConversationAdapter(this, listaConversaciones);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(conversationAdapter);
+        layoutInput.setVisibility(View.GONE);
+        if (currentUserId == null) {
+            Toast.makeText(this, "Inicie sesión para ver sus chats.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        conversacionesRef = FirebaseDatabase.getInstance().getReference("user_chats").child(currentUserId);
+        conversationAdapter.setOnConversationClickListener(contactId -> {
+            Intent i = new Intent(this, ChatActivity.class);
+            i.putExtra("contacto_id", contactId);
+            startActivity(i);
+        });
+        conversacionesRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                listaConversaciones.clear();
+                for (DataSnapshot child : snapshot.getChildren()) {
+                    String contactId = child.child("contactId").getValue(String.class);
+                    String name = child.child("contactName").getValue(String.class);
+                    String lastMsg = child.child("lastMessage").getValue(String.class);
+                    Long ts = child.child("lastTimestamp").getValue(Long.class);
+                    String avatar = child.child("contactAvatarUrl").getValue(String.class);
+                    if (contactId != null) {
+                        listaConversaciones.add(new ConversationAdapter.Item(contactId, name, lastMsg, ts != null ? ts : 0, avatar));
+                    }
+                }
+                java.util.Collections.sort(listaConversaciones, (a, b) -> Long.compare(b.lastTimestamp, a.lastTimestamp));
+                conversationAdapter.notifyDataSetChanged();
+            }
+            @Override
+            public void onCancelled(DatabaseError error) { }
         });
     }
-    private void enviarMensajeSimulado() {
-        String texto = etMensaje.getText().toString().trim();
-        if (!texto.isEmpty()) {
-            // 1. Crea el nuevo objeto Mensaje (como si fuera el usuario propio)
-            Mensaje nuevoMensaje = new Mensaje(
-                    "ID_SIMULADO_" + (listaMensajes.size() + 1), // ID único simulado
-                    CURRENT_USER_ID, // ID del remitente (el usuario propio)
-                    texto,
-                    System.currentTimeMillis() // Hora actual
-            );
-            // 2. Agrega el mensaje a la lista
-            listaMensajes.add(nuevoMensaje);
-            // 3. Notifica al adaptador del cambio (para que se muestre en la lista)
-            mensajeAdapter.notifyItemInserted(listaMensajes.size() - 1);
-            // 4. Desplaza la lista al último mensaje
-            recyclerView.scrollToPosition(listaMensajes.size() - 1);
-            // 5. Limpia la caja de texto
-            etMensaje.setText("");
-            simularRespuesta();
-        } else {
-            Toast.makeText(this, "Escriba un mensaje.", Toast.LENGTH_SHORT).show();
+    private void configurarFirebase() {
+        if (currentUserId == null || contactoId == null) {
+            Toast.makeText(this, "Inicie sesión para usar el chat.", Toast.LENGTH_LONG).show();
+            return;
         }
+        String chatId = generarChatId(currentUserId, contactoId);
+        mensajesRef = FirebaseDatabase.getInstance().getReference("chats").child(chatId).child("mensajes");
+        mensajesRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                listaMensajes.clear();
+                for (DataSnapshot child : snapshot.getChildren()) {
+                    Mensaje m = child.getValue(Mensaje.class);
+                    if (m != null) listaMensajes.add(m);
+                }
+                mensajeAdapter.notifyDataSetChanged();
+                if (!listaMensajes.isEmpty()) recyclerView.scrollToPosition(listaMensajes.size() - 1);
+                Mensaje last = listaMensajes.isEmpty() ? null : listaMensajes.get(listaMensajes.size()-1);
+                if (last != null) {
+                    actualizarIndiceChat(currentUserId, contactoId, last.getContenido(), last.getTimestamp());
+                    actualizarIndiceChat(contactoId, currentUserId, last.getContenido(), last.getTimestamp());
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError error) { }
+        });
     }
-    // Simula una respuesta automática del contacto después de un pequeño retraso
-    private void simularRespuesta() {
-        // Simula la respuesta de Antonio Vera
-        String respuestaTexto = "¡Hola! Gracias por tu mensaje. El producto sigue disponible.";
-        Mensaje respuesta = new Mensaje(
-                "ID_RESPUESTA_" + (listaMensajes.size() + 1),
-                "DiegoDev_id", // ID del remitente (el otro usuario)
-                respuestaTexto,
-                System.currentTimeMillis() + 1000 // Hora ligeramente posterior
-        );
-        // Agregamos la respuesta con un pequeño retraso visual
-        recyclerView.postDelayed(() -> {
-            listaMensajes.add(respuesta);
-            mensajeAdapter.notifyItemInserted(listaMensajes.size() - 1);
-            recyclerView.scrollToPosition(listaMensajes.size() - 1);
-        }, 1000); // Retraso de 1 segundo
+    private void configurarListeners() {
+        btnEnviarMensaje.setOnClickListener(v -> enviarMensaje());
+        btnEnviarImagen.setOnClickListener(v -> Toast.makeText(this, "Adjuntar imagen próximamente", Toast.LENGTH_SHORT).show());
     }
-    //Carga mensajes estáticos para ver cómo se ve la interfaz al iniciar.
-    private List<Mensaje> cargarMensajesDePrueba() {
-        List<Mensaje> mensajes = new ArrayList<>();
-        // Mensaje del OTRO usuario (izquierda)
-        mensajes.add(new Mensaje("m1", "DiegoDev_id", "¡Hola! ¿Aún tienes la bicicleta a la venta?", System.currentTimeMillis() - 600000));
-                // Mensaje del USUARIO PROPIO (derecha)
-                mensajes.add(new Mensaje("m2", CURRENT_USER_ID, "Sí, claro. Está en excelente estado.", System.currentTimeMillis() - 300000));
-                        // Mensaje del OTRO usuario (izquierda)
-                        mensajes.add(new Mensaje("m3", "DiegoDev_id", "¿Podrías enviarme más fotos de los detalles? ¿Y dónde podría recogerla?", System.currentTimeMillis() - 120000));
-        return mensajes;
+    private void enviarMensaje() {
+        String texto = etMensaje.getText().toString().trim();
+        if (texto.isEmpty() || mensajesRef == null || currentUserId == null) {
+            Toast.makeText(this, "Escriba un mensaje.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String key = mensajesRef.push().getKey();
+        if (key == null) return;
+        Mensaje m = new Mensaje(key, currentUserId, texto, System.currentTimeMillis());
+        mensajesRef.child(key).setValue(m).addOnSuccessListener(a -> {
+            etMensaje.setText("");
+            actualizarIndiceChat(currentUserId, contactoId, texto, m.getTimestamp());
+            actualizarIndiceChat(contactoId, currentUserId, texto, m.getTimestamp());
+        });
+    }
+    private String generarChatId(String a, String b) {
+        return a.compareTo(b) < 0 ? a + "_" + b : b + "_" + a;
+    }
+    private void actualizarIndiceChat(String ownerId, String otherId, String lastMessage, long ts) {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("user_chats").child(ownerId).child(generarChatId(ownerId, otherId));
+        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users").child(otherId);
+        usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                String nombre = snapshot.child("nombre").getValue(String.class);
+                String avatar = snapshot.child("urlImagenPerfil").getValue(String.class);
+                java.util.Map<String,Object> data = new java.util.HashMap<>();
+                data.put("contactId", otherId);
+                data.put("contactName", nombre);
+                data.put("lastMessage", lastMessage);
+                data.put("lastTimestamp", ts);
+                if (avatar != null) data.put("contactAvatarUrl", avatar);
+                ref.updateChildren(data);
+            }
+            @Override public void onCancelled(DatabaseError error) { }
+        });
     }
 }

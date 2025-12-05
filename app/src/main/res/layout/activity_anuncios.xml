@@ -7,20 +7,17 @@
     android:layout_height="match_parent"
     android:background="@color/white"
     tools:context=".AnunciosActivity">
-
     <!-- 1. AppBar con Contenedor de Barra (RelativeLayout) -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
         <!-- Usamos un RelativeLayout para controlar la posición del botón y título -->
         <RelativeLayout
             android:id="@+id/toolbar_anuncios"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary">
-
             <!-- Botón de Retroceso (TU COMPONENTE) -->
             <ImageButton
                 android:id="@+id/btnBack"
@@ -33,8 +30,8 @@
                 android:paddingEnd="16dp"
                 android:src="@drawable/ic_arrow_back"
                 app:tint="@color/white"
-                android:scaleType="centerInside"/>
-
+                android:scaleType="centerInside"
+                />
             <!-- Título Centrado (Simulación de Título de Toolbar) -->
             <TextView
                 android:layout_width="wrap_content"
@@ -44,19 +41,29 @@
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold" />
-
         </RelativeLayout>
-
     </com.google.android.material.appbar.AppBarLayout>
-
     <!-- 2. Contenido Principal: RecyclerView de Productos -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_mis_productos"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:paddingBottom="56dp"
+        android:paddingBottom="0dp"
         android:clipToPadding="false"
         tools:listitem="@layout/item_producto"/>
-
+    <!-- Mensaje para cuando no hay anuncios -->
+    <TextView
+        android:id="@+id/tv_no_anuncios"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="¡Aún no has creado ningún anuncio! Comienza a vender tus productos."
+        android:textSize="16sp"
+        android:textColor="@android:color/darker_gray"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:padding="32dp"
+        android:visibility="gone"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

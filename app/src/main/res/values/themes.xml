@@ -1,9 +1,36 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.MarketPlace" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+    <style name="Theme.MarketPlace" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Colores principales -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primary_dark</item>
+        <item name="colorSecondary">@color/secondary</item>
+
+        <!-- Fuentes -->
+
+
+        <!-- Fondo general -->
+        <item name="android:colorBackground">@color/background_light</item>
+
+        <!-- Inputs redondeados -->
+        <item name="shapeAppearanceSmallComponent">@style/Rounded.Inputs</item>
+        <item name="shapeAppearanceMediumComponent">@style/Rounded.Inputs</item>
+
+        <!-- Botones modernos -->
+        <item name="materialButtonStyle">@style/ModernButton</item>
     </style>
 
-    <style name="Theme.MarketPlace" parent="Base.Theme.MarketPlace" />
+    <!-- Redondeado uniforme Material -->
+    <style name="Rounded.Inputs" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">14dp</item>
+    </style>
+
+    <!-- Botón moderno -->
+    <style name="ModernButton" parent="Widget.Material3.Button">
+        <item name="cornerSize">16dp</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
 </resources>

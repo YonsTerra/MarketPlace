@@ -1,5 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+
+    <!-- Colores principales modernos -->
+    <color name="primary">#4F46E5</color> <!-- Indigo moderno -->
+    <color name="primary_dark">#3730A3</color>
+    <color name="primary_light">#6366F1</color>
+
+    <!-- Secundario -->
+    <color name="secondary">#14B8A6</color> <!-- Turquesa moderno -->
+    <color name="secondary_light">#2DD4BF</color>
+
+    <!-- Fondo moderno -->
+    <color name="background_light">#F9FAFB</color>
+    <color name="background_dark">#111827</color>
+
+    <!-- Texto -->
+    <color name="text_primary">#1F2937</color>
+    <color name="text_secondary">#6B7280</color>
+
+    <!-- Blanco y negro -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
 </resources>

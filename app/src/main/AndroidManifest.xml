@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28"/>
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -11,40 +19,47 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MarketPlace">
+        
+
         <activity
-            android:name=".Login"
-            android:exported="true">
+            android:name=".Home"
+            android:exported="true"/>
+        <activity
+            android:name=".Detalle_Producto"
+            android:exported="true"/>
+        <activity
+            android:name=".Publicar"
+            android:exported="true"/>
+        <activity
+            android:name=".Registro"
+            android:exported="true"/>
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"/>
+
+        <activity android:name=".CuentaActivity"
+            android:exported="true"/>
+
+        <activity android:name=".AnunciosActivity"
+            android:exported="true"/>
+
+        <activity android:name=".ChatActivity"
+            android:exported="true"/>
+
+        <activity android:name=".EditarPerfilActivity"
+            android:exported="true"/>
+
+        <activity android:name=".CambiarPasswordActivity"
+            android:exported="true"/>
+
+        <activity android:name=".Login" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".Home"
-            android:exported="false"/>
-        <activity
-            android:name=".Detalle_Producto"
-            android:exported="false"/>
-        <activity
-            android:name=".Publicar"
-            android:exported="false"/>
-        <activity
-            android:name=".Registro"
-            android:exported="false"/>
-        <activity
-            android:name=".MainActivity"
-            android:exported="false"/>
-        <activity android:name=".CuentaActivity"
-            android:exported="false"/>
-        <activity android:name=".AnunciosActivity"
-            android:exported="false"/>
-        <activity android:name=".ChatActivity"
-            android:exported="false"/>
-        <activity android:name=".EditarPerfilActivity"
-            android:exported="false"/>
-        <activity android:name=".CambiarPasswordActivity"
-            android:exported="false"/>
+
 
 
 

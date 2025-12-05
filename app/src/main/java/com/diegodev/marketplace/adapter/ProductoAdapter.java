@@ -6,41 +6,44 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
-import android.widget.Toast;
+
+// Importación de Glide para la carga de imágenes
+import com.bumptech.glide.Glide;
 
 import com.diegodev.marketplace.Detalle_Producto;
 import com.diegodev.marketplace.R;
 import com.diegodev.marketplace.model.Producto;
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-// SEMANA 5: Adaptador modificado para soportar el filtrado de productos
+// Adaptador modificado para soportar el filtrado de productos y carga segura de imágenes
 public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.ProductoViewHolder> {
 
-    private static final String TAG = "ProductoAdapter"; // Etiqueta para el Logcat
+    private static final String TAG = "ProductoAdapter";
 
     private final Context context;
     // Lista visible para el RecyclerView (la que se filtra)
     private List<Producto> listaProductos;
-    // SEMANA 5: Copia  de la lista original para restaurar el filtro
+    // Copia de la lista original para restaurar el filtro
     private final List<Producto> listaOriginal;
 
     public ProductoAdapter(Context context, List<Producto> lista) {
         this.context = context;
+        // Inicializa ambas listas con la lista pasada
         this.listaProductos = new ArrayList<>(lista);
-        // SEMANA 5: Inicializa la lista original
         this.listaOriginal = new ArrayList<>(lista);
     }
 
     @NonNull
     @Override
-    public ProductoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
-    {
+    public ProductoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_producto, parent, false);
         return new ProductoViewHolder(view);
     }
@@ -51,12 +54,31 @@ public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.Produc
 
         // A. Asignar datos del Producto a las Vistas
         holder.tvNombre.setText(producto.getNombre());
-        holder.tvPrecio.setText(producto.getPrecio());
+        // Formateamos el precio para asegurar un formato de moneda consistente
+        holder.tvPrecio.setText(String.format(Locale.getDefault(), "$%.2f", producto.getPrecio()));
+
+        // 1. Asignamos el placeholder por defecto antes de intentar cargar la URL
+        holder.ivImagenProducto.setImageResource(R.drawable.agregar_img);
+
+        if (producto.getImageUrls() != null && !producto.getImageUrls().isEmpty()) {
+            String imageUrl = producto.getImageUrls().get(0); // Obtener la primera URL
+
+            // 2. Validación CRÍTICA: La URL debe ser una cadena válida (no nula ni vacía)
+            if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+                Glide.with(context)
+                        .load(imageUrl)
+                        .placeholder(R.drawable.agregar_img) // Placeholder temporal mientras carga
+                        .error(R.drawable.agregar_img)
+                        .centerCrop()
+                        .into(holder.ivImagenProducto);
+            }
+        }
+
 
         // B. Manejo del Clic en el Ítem
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, Detalle_Producto.class);
-            //Enviamos el ID del producto seleccionado a la pantalla de detalle
+            // Enviamos el ID del producto seleccionado a la pantalla de detalle
             intent.putExtra(Detalle_Producto.EXTRA_PRODUCTO_ID, producto.getId());
             context.startActivity(intent);
         });
@@ -68,8 +90,22 @@ public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.Produc
         return listaProductos.size();
     }
 
+    public void actualizarProductos(List<Producto> nuevaLista) {
+        // 1. Limpia y reemplaza la lista visible
+        this.listaProductos.clear();
+        this.listaProductos.addAll(nuevaLista);
 
-    //SEMANA 5: Filtra los productos según el texto ingresado
+        // 2. Limpia y reemplaza la lista original (para que el filtro funcione con la nueva data)
+        this.listaOriginal.clear();
+        this.listaOriginal.addAll(nuevaLista);
+
+        // 3. Notifica al RecyclerView para que se redibuje
+        notifyDataSetChanged();
+        Log.d(TAG, "Lista de productos actualizada. Total: " + nuevaLista.size());
+    }
+
+
+    // Filtra los productos según el texto ingresado
     public void filtrar(String texto) {
         String textoBusqueda = texto.toLowerCase(Locale.getDefault()).trim();
 
@@ -77,11 +113,11 @@ public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.Produc
         List<Producto> listaFiltrada = new ArrayList<>();
 
         if (textoBusqueda.isEmpty()) {
-            // SEMANA 5: Si el texto está vacío, usamos la lista original completa para restaurar.
+            // Si el texto está vacío, usamos la lista original completa para restaurar.
             listaFiltrada.addAll(listaOriginal);
             Log.d(TAG, "Búsqueda vacía. Mostrando todos los productos: " + listaFiltrada.size());
         } else {
-            // SEMANA 5: Si hay texto, filtramos iterando sobre la lista original (la inmutable).
+            // Filtramos iterando sobre la lista original (la inmutable).
             for (Producto producto : listaOriginal) {
                 if (producto.getNombre().toLowerCase(Locale.getDefault()).contains(textoBusqueda)) {
                     listaFiltrada.add(producto);
@@ -98,12 +134,15 @@ public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.Produc
 
     // ViewHolder con los IDs
     public static class ProductoViewHolder extends RecyclerView.ViewHolder {
+        // Agregamos la referencia al ImageView
+        ImageView ivImagenProducto;
         TextView tvNombre;
         TextView tvPrecio;
 
         public ProductoViewHolder(@NonNull View itemView) {
             super(itemView);
-            // SEMANA 5: IDs  para coincidir con activity_item_producto.xml
+            // CRÍTICO: Debes asegurarte de que este ID exista en tu layout activity_item_producto.xml
+            ivImagenProducto = itemView.findViewById(R.id.iv_producto_imagen);
             tvNombre = itemView.findViewById(R.id.tv_producto_titulo);
             tvPrecio = itemView.findViewById(R.id.tv_producto_precio);
         }
