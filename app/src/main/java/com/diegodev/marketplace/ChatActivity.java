@@ -53,12 +53,14 @@ public class ChatActivity extends AppCompatActivity {
         contactoId = getIntent().getStringExtra("contacto_id");
         configurarCabecera();
         if (contactoId != null && !contactoId.isEmpty()) {
+            layoutInput.setVisibility(View.VISIBLE);
             configurarRecyclerView();
-            configurarFirebase();
             configurarListeners();
+            configurarFirebase(); //  listener  al final
         } else {
             configurarListaConversaciones();
         }
+
     }
     private void inicializarVistas() {
         tvNombreContacto = findViewById(R.id.tvContactName);
@@ -143,32 +145,32 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
     private void configurarFirebase() {
-        if (currentUserId == null || contactoId == null) {
-            Toast.makeText(this, "Inicie sesión para usar el chat.", Toast.LENGTH_LONG).show();
-            return;
-        }
+        if (currentUserId == null || contactoId == null) return;
+
         String chatId = generarChatId(currentUserId, contactoId);
-        mensajesRef = FirebaseDatabase.getInstance().getReference("chats").child(chatId).child("mensajes");
-        mensajesRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                listaMensajes.clear();
-                for (DataSnapshot child : snapshot.getChildren()) {
-                    Mensaje m = child.getValue(Mensaje.class);
-                    if (m != null) listaMensajes.add(m);
-                }
-                mensajeAdapter.notifyDataSetChanged();
-                if (!listaMensajes.isEmpty()) recyclerView.scrollToPosition(listaMensajes.size() - 1);
-                Mensaje last = listaMensajes.isEmpty() ? null : listaMensajes.get(listaMensajes.size()-1);
-                if (last != null) {
-                    actualizarIndiceChat(currentUserId, contactoId, last.getContenido(), last.getTimestamp());
-                    actualizarIndiceChat(contactoId, currentUserId, last.getContenido(), last.getTimestamp());
-                }
-            }
-            @Override
-            public void onCancelled(DatabaseError error) { }
-        });
+        mensajesRef = FirebaseDatabase.getInstance()
+                .getReference("chats")
+                .child(chatId)
+                .child("mensajes");
+
+        mensajesRef.orderByChild("timestamp")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+                        listaMensajes.clear();
+                        for (DataSnapshot child : snapshot.getChildren()) {
+                            Mensaje m = child.getValue(Mensaje.class);
+                            if (m != null) listaMensajes.add(m);
+                        }
+                        mensajeAdapter.notifyDataSetChanged();
+                        if (!listaMensajes.isEmpty()) {
+                            recyclerView.scrollToPosition(listaMensajes.size() - 1);
+                        }
+                    }
+                    @Override public void onCancelled(DatabaseError error) { }
+                });
     }
+
     private void configurarListeners() {
         btnEnviarMensaje.setOnClickListener(v -> enviarMensaje());
         btnEnviarImagen.setOnClickListener(v -> Toast.makeText(this, "Adjuntar imagen próximamente", Toast.LENGTH_SHORT).show());

@@ -43,6 +43,10 @@ public class AnunciosActivity extends AppCompatActivity {
         // 3. Configurar RecyclerView
         listaProductos = new ArrayList<>();
         productoAdapter = new ProductoAdapter(this, listaProductos);
+        productoAdapter.setModoMisAnuncios(true);
+        rvMisAnuncios.setAdapter(productoAdapter);
+
+
         // Configuración del LayoutManager para que sepa dibujar los ítems
         rvMisAnuncios.setLayoutManager(new LinearLayoutManager(this));
         rvMisAnuncios.setAdapter(productoAdapter);

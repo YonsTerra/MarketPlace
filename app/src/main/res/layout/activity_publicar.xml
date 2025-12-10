@@ -1,184 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:background="#F5F5F5"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".Publicar">
+    android:layout_height="match_parent">
 
-    <ScrollView
+    <LinearLayout
+        android:padding="20dp"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:layout_height="wrap_content">
 
-        <LinearLayout
+        <ImageView
+            android:id="@+id/iv_publicar_imagen_placeholder"
+            android:src="@drawable/agregar_img"
+            android:scaleType="centerInside"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:layout_height="180dp"/>
 
-            <!-- SECCIÓN DE IMAGEN PRINCIPAL -->
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:layout_marginBottom="16dp">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_galeria_imagenes"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
-                <ImageView
-                    android:id="@+id/iv_publicar_imagen_placeholder"
-                    android:layout_width="120dp"
-                    android:layout_height="120dp"
-                    android:layout_gravity="center_horizontal"
-                    android:src="@drawable/agregar_img"
-                    android:scaleType="centerCrop"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:contentDescription="Añadir imagen principal" />
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_publicar_nombre"
+            android:hint="Nombre"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
-            </FrameLayout>
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_publicar_precio"
+            android:hint="Precio"
+            android:inputType="numberDecimal"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Galería (hasta 10 imágenes)"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"/>
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_publicar_direccion"
+            android:hint="Dirección"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_galeria_imagenes"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:nestedScrollingEnabled="false"
-                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                app:spanCount="4"
-                tools:listitem="@layout/item_galeria_imagen"/>
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_publicar_descripcion"
+            android:hint="Descripción"
+            android:minLines="3"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
-            <!-- 1. Nombre del producto (Título) -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Nombre del producto"
-                android:layout_marginBottom="12dp"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_publicar_nombre"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textCapSentences"
-                    android:maxLines="1" />
-            </com.google.android.material.textfield.TextInputLayout>
+        <AutoCompleteTextView
+            android:id="@+id/spinner_categoria"
+            android:hint="Categoría"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
-            <!-- 2. Precio -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Precio"
-                android:layout_marginBottom="12dp"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_publicar_precio"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="numberDecimal"
-                    android:maxLines="1" />
-            </com.google.android.material.textfield.TextInputLayout>
+        <AutoCompleteTextView
+            android:id="@+id/spinner_condicion"
+            android:hint="Condición"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
-            <!-- 3. Marca (opcional) -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Marca (opcional)"
-                android:layout_marginBottom="12dp"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_publicar_marca"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textCapWords"
-                    android:maxLines="1" />
-            </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_publicar_producto"
+            android:text="Publicar"
+            android:layout_marginTop="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"/>
 
-            <!-- 4. CONDICIÓN: CORREGIDO (ExposedDropdownMenu OutlinedBox) -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Condición del Producto"
-                android:layout_marginBottom="12dp"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
-
-                <AutoCompleteTextView
-                    android:id="@+id/spinner_condicion"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="none"
-                    android:maxLines="1"
-                    tools:text="Nuevo"/>
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- 5. CATEGORÍA: CORREGIDO (ExposedDropdownMenu OutlinedBox) -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Categoría"
-                android:layout_marginBottom="12dp"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
-
-                <AutoCompleteTextView
-                    android:id="@+id/spinner_categoria"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="none"
-                    android:maxLines="1"
-                    tools:text="Electrónica"/>
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- 6. Dirección de retiro -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Dirección de retiro (Incluye ciudad o zona)"
-                android:layout_marginBottom="12dp"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_publicar_direccion"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPostalAddress"
-                    android:maxLines="2" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- 7. Descripción del producto -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Descripción del producto"
-                android:layout_marginBottom="24dp"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_publicar_descripcion"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textMultiLine"
-                    android:minLines="3"
-                    android:gravity="top" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- 8. Botón PUBLICAR PRODUCTO -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_publicar_producto"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="PUBLICAR PRODUCTO"
-                android:padding="16dp"
-                android:textSize="16sp"
-                app:cornerRadius="8dp"
-                style="@style/Widget.MaterialComponents.Button.Icon" />
-
-        </LinearLayout>
-    </ScrollView>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    </LinearLayout>
+</ScrollView>
